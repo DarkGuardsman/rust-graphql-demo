@@ -11,6 +11,6 @@ pub struct HelloInput {
 #[Object]
 impl Query {
     async fn hello(&self, ctx: &Context<'_>, input: HelloInput) -> String {
-        resolve_hello(&input.message)
+        resolve_hello(&ctx, &input)
     }
 }

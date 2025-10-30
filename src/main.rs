@@ -1,22 +1,20 @@
 mod schema;
+mod resolvers;
 
 use anyhow::Context;
 use async_graphql::{EmptyMutation, EmptySubscription, Schema, http::GraphiQLSource};
-use async_graphql_axum::GraphQL;
+use axum::{extract::State, http::HeaderMap};
+use async_graphql_axum::GraphQLRequest;
+use async_graphql_axum::GraphQLResponse;
 use axum::{
     Router,
     response::{self, IntoResponse},
-    routing::get,
+    routing::{get}
 };
-use axum::serve::Listener;
 use tokio::net::TcpListener;
 use dotenv::dotenv;
-use log::debug;
-use crate::schema::Query;
 
-async fn graphql() -> impl IntoResponse {
-    response::Html(GraphiQLSource::build().endpoint("/graphql").finish())
-}
+use crate::schema::Query;
 
 //#region [ENV Defaults]
 const DEFAULT_ADDRESS: &str = "127.0.0.1";
@@ -44,22 +42,51 @@ async fn start_server() -> anyhow::Result<()> {
     let graphql_path = std::env::var("ROUTE_GRAPHQL").unwrap_or_else(|_| { DEFAULT_GRAPHQL_ROUTE.to_string()});
 
     // Setup GraphQL
-    let schema = Schema::build(Query, EmptyMutation, EmptySubscription)
-        .finish();
+    let schema = Schema::build(Query, EmptyMutation, EmptySubscription).finish();
 
     // Setup HTTP server
     let router = Router::new()
-        .route(&format!("/{}", &graphql_path), get(graphql).post_service(GraphQL::new(schema)));
+        .route(&format!("/{}", &graphql_path), get(graphql_playground).post(graphql_handler))
+        .with_state(schema);
+        //.route(&format!("/{}", &graphql_path), get(graphql).post_service(GraphQL::new(schema)));
 
     let address = format!("{}:{}", server_address, server_port);
     let listener = TcpListener::bind(address).await.context("Failed to bind to address")?;
 
     #[cfg(feature = "local")] {
         let local_addr = listener.local_addr()?;
-        debug!("Graph running: http://{}/{}", local_addr, graphql_path);
+        log::info!("Graph running: http://{}/{}", local_addr, graphql_path);
     }
 
 
     axum::serve(listener, router).await?;
     Ok(())
+}
+
+#[derive(Clone)]
+pub struct Headers {
+    pub user: String,
+}
+
+fn get_headers_for_context(headers: &HeaderMap) -> Headers {
+   Headers {
+        user: headers
+            .get("User")
+            .and_then(|value| value.to_str().map(|s| s.to_string()).ok())
+            .unwrap_or_else(|| "User".to_string())
+    }
+}
+
+async fn graphql_handler(
+    headers: HeaderMap, // Extract headers
+    State(schema): State<Schema<Query, EmptyMutation, EmptySubscription>>,
+    req: GraphQLRequest,
+) -> GraphQLResponse {
+    let mut req = req.into_inner();
+    req = req.data(get_headers_for_context(&headers));
+    schema.execute(req).await.into()
+}
+
+async fn graphql_playground() -> impl IntoResponse {
+    response::Html(GraphiQLSource::build().endpoint("/graphql").finish())
 }
