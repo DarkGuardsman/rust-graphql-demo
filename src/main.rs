@@ -58,7 +58,6 @@ async fn start_server() -> anyhow::Result<()> {
         log::info!("Graph running: http://{}/{}", local_addr, graphql_path);
     }
 
-
     axum::serve(listener, router).await?;
     Ok(())
 }
@@ -88,5 +87,7 @@ async fn graphql_handler(
 }
 
 async fn graphql_playground() -> impl IntoResponse {
-    response::Html(GraphiQLSource::build().endpoint("/graphql").finish())
+    let graphql_path = std::env::var("ROUTE_GRAPHQL").unwrap_or_else(|_| { DEFAULT_GRAPHQL_ROUTE.to_string()});
+    let path = format!("/{}", graphql_path);
+    response::Html(GraphiQLSource::build().endpoint(&path).finish())
 }
