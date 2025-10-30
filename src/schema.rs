@@ -1,12 +1,16 @@
-use async_graphql::{EmptyMutation, EmptySubscription, Object, Schema};
+use async_graphql::{Context, InputObject, Object};
+use crate::resolvers::resolve_hello::resolve_hello;
 
 pub struct Query;
 
-#[Object]
-impl Query {
-    async fn hello(&self) -> String {
-        "Hello, async-graphql with Axum!".to_string()
-    }
+#[derive(InputObject)]
+pub struct HelloInput {
+    pub message: String,
 }
 
-pub type AppSchema = Schema<Query, EmptyMutation, EmptySubscription>;
+#[Object]
+impl Query {
+    async fn hello(&self, ctx: &Context<'_>, input: HelloInput) -> String {
+        resolve_hello(&input.message)
+    }
+}
