@@ -30,3 +30,5 @@ target
 .idea/
 
 Cargo.lock
+
+*.log

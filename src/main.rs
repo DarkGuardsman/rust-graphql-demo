@@ -4,6 +4,7 @@ mod loaders;
 mod datasource;
 mod mem_tracing;
 
+
 use anyhow::Context;
 use async_graphql::{
     EmptyMutation, EmptySubscription, Error, Result, Schema, http::GraphiQLSource, ServerError,
@@ -22,9 +23,6 @@ use dotenv::dotenv;
 use tokio::net::TcpListener;
 use crate::mem_tracing::MemoryMetricsExtension;
 use crate::schema::{Query, RoomLoader};
-
-//#[global_allocator] TODO this only works on unix
-//static ALLOC: jemallocator::Jemalloc = jemallocator::Jemalloc;
 
 //#region [ENV Defaults]
 const DEFAULT_ADDRESS: &str = "127.0.0.1";
@@ -46,6 +44,16 @@ fn main() -> anyhow::Result<()> {
 
 // Async context for server
 async fn start_server() -> anyhow::Result<()> {
+
+    // use std::fs::File;
+    // use std::sync::Arc;
+    // let file = File::create(format!("debug-{}.log", std::time::SystemTime::now().duration_since(std::time::UNIX_EPOCH).unwrap().as_secs()))?;
+    //
+    // tracing_subscriber::fmt()
+    //     .with_max_level(tracing::Level::DEBUG)
+    //     .with_writer(Arc::new(file))
+    //     .init();
+
     let server_address =
         std::env::var("SERVER_ADDRESS").unwrap_or_else(|_| DEFAULT_ADDRESS.to_string());
     let server_port = std::env::var("SERVER_PORT").unwrap_or_else(|_| DEFAULT_PORT.to_string());
