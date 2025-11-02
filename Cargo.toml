@@ -11,7 +11,7 @@ run-local="cargo run --features local"
 local=[]
 
 [dependencies]
-async-graphql = { version = "7.0.17" }
+async-graphql = { version = "7.0.17", features = ["dataloader"] }
 async-graphql-axum = { version = "7.0.17" }
 tokio = { version = "1.48.0", features = ["full"] }
 axum = { version = "0.8.6" }
@@ -21,3 +21,4 @@ log = "0.4.28"
 anyhow = "1.0.100"
 env_logger = "0.11.8"
 reqwest = { version = "0.12.24", features = ["json"] }
+async-trait = "0.1.89"

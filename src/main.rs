@@ -1,10 +1,12 @@
 mod resolvers;
 mod schema;
+mod loaders;
 
 use anyhow::Context;
 use async_graphql::{
     EmptyMutation, EmptySubscription, Error, Result, Schema, http::GraphiQLSource, ServerError,
 };
+use async_graphql::dataloader::DataLoader;
 use async_graphql_axum::GraphQLRequest;
 use async_graphql_axum::GraphQLResponse;
 use axum::{
@@ -16,7 +18,7 @@ use axum::{extract::State, http::HeaderMap};
 use dotenv::dotenv;
 use tokio::net::TcpListener;
 
-use crate::schema::Query;
+use crate::schema::{Query, RoomLoader};
 
 //#region [ENV Defaults]
 const DEFAULT_ADDRESS: &str = "127.0.0.1";
@@ -44,8 +46,12 @@ async fn start_server() -> anyhow::Result<()> {
     let graphql_path =
         std::env::var("ROUTE_GRAPHQL").unwrap_or_else(|_| DEFAULT_GRAPHQL_ROUTE.to_string());
 
+    let use_room_loader = std::env::var("ENABLE_ROOM_LOADER").unwrap_or_else(|_| "false".to_string()) == "true";
+
     // Setup GraphQL
-    let schema = Schema::build(Query, EmptyMutation, EmptySubscription).finish();
+    let schema = Schema::build(Query, EmptyMutation, EmptySubscription)
+        .data(AppContext::new(use_room_loader))
+        .finish();
 
     // Setup HTTP server
     let router = Router::new()
@@ -71,12 +77,27 @@ async fn start_server() -> anyhow::Result<()> {
     Ok(())
 }
 
+pub struct AppContext {
+    pub use_room_loader: bool,
+    pub room_loader: DataLoader<RoomLoader>,
+}
+
+impl AppContext {
+    pub fn new(use_room_loader: bool) -> Self {
+        Self {
+            use_room_loader,
+            room_loader: DataLoader::new(RoomLoader {}, tokio::spawn),
+        }
+    }
+}
+
 #[derive(Clone)]
 pub struct Headers {
     pub token: String,
 }
 
 fn get_headers_for_context(headers: &HeaderMap) -> Result<Headers> {
+    // TODO migrate to axum extractor
     let token = headers
         .get("Authorization")
         .and_then(|value| value.to_str().map(|s| s.to_string()).ok());
