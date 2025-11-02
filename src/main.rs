@@ -30,6 +30,11 @@ const DEFAULT_PORT: &str = "3000";
 const DEFAULT_GRAPHQL_ROUTE: &str = "graphql";
 //#endregion [ENV Defaults]
 
+use alloc_metrics::MetricAlloc;
+
+#[global_allocator]
+static GLOBAL: MetricAlloc<std::alloc::System> = MetricAlloc::new(std::alloc::System);
+
 // Entry point
 fn main() -> anyhow::Result<()> {
     // Load ENVs from the .env file, ignore if it doesn't exist

@@ -6,9 +6,9 @@ use async_graphql::extensions::{
 };
 use async_graphql::{Value};
 use std::sync::Arc;
+use alloc_metrics::{global_metrics, thread_metrics};
 use byte_unit::{Byte};
 use log::{debug, trace};
-use memory_stats::memory_stats;
 
 pub struct MemoryMetricsExtension;
 
@@ -18,28 +18,42 @@ impl ExtensionFactory for MemoryMetricsExtension {
     }
 }
 
+#[derive(serde::Serialize)]
+struct ExtensionMemoryStats {
+    memory: String,
+    bytes: isize,
+    count: isize,
+}
+
+
 #[async_trait::async_trait]
 impl Extension for MemoryMetricsExtension {
 
     // Crude way to get memory usage for tracking
     async fn execute(&self, ctx: &ExtensionContext<'_>, operation_name: Option<&str>, next: NextExecute<'_>) -> async_graphql::Response {
 
-        let memory_before_stat = memory_stats().unwrap();
-        let memory_before = memory_before_stat.physical_mem + memory_before_stat.virtual_mem;
-        trace!("Memory usage before execution: {} bytes", memory_before);
+        let before = global_metrics();
+        trace!("Allocations before: {} bytes {} count", before.allocated_bytes, before.allocations);
 
         let result = next.run(ctx, operation_name).await;
 
-        let memory_after_stat = memory_stats().unwrap();
-        let memory_after = memory_after_stat.physical_mem + memory_after_stat.virtual_mem;
-        trace!("Memory usage after execution: {} bytes", memory_after);
+        let after = global_metrics();
+        trace!("Allocations after: {} bytes {} count", after.allocated_bytes, after.allocations);
 
-        let memory_diff = memory_after as i64 - memory_before as i64;
-        debug!("Memory difference during execution: {} bytes", memory_diff);
+        let delta = after - before;
+        debug!("Allocations: {} bytes {} count", delta.allocated_bytes, delta.allocations);
 
-        tracing::Span::current().record("memory_allocated_bytes", memory_diff); // TODO this isn't consistent due to memory released before call
+        tracing::Span::current().record("memory_allocated_bytes", delta.allocated_bytes);
+        tracing::Span::current().record("memory_allocated_count", delta.allocations);
 
-        let byte_instance = Byte::from_i64(memory_diff).unwrap();
-        result.extension("memory", Value::String(format!("{byte_instance:#}")))
+        let byte_instance = Byte::from_u64(delta.allocated_bytes as u64);
+        let stats = ExtensionMemoryStats {
+            memory: format!("{byte_instance:#}"),
+            bytes: delta.allocated_bytes,
+            count: delta.allocations,
+        };
+        let json_value = serde_json::to_value(&stats).unwrap();
+        let gql_value = Value::from_json(json_value).unwrap();
+        result.extension("memory", gql_value)
     }
 }
