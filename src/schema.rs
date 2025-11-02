@@ -8,9 +8,21 @@ use crate::resolvers::resolve_room::resolve_room;
 pub struct Query;
 
 #[derive(SimpleObject, Deserialize, Serialize, Clone)]
+#[graphql(complex)]
 pub struct Room {
     pub id: u32,
     pub name: String,
+
+    #[graphql(visible = false)]
+    #[serde(rename = "buildingId")]
+    pub building_id: u32,
+}
+
+#[ComplexObject]
+impl Room {
+    async fn building(&self, ctx: &Context<'_>) -> Result<Option<Building>> {
+        return resolve_building(ctx, &self.building_id).await;
+    }
 }
 
 #[derive(SimpleObject, Deserialize, Serialize, Clone)]
@@ -23,14 +35,15 @@ pub struct Building {
 #[ComplexObject]
 impl Building {
     async fn rooms(&self) -> Vec<Room> {
-        vec![]
+        vec![] //TODO implement as a look-ahead modifier on get_building by sending `?expand=rooms` with only `ids` returning
     }
 }
+
 
 #[Object]
 impl Query {
 
-    async fn building(&self, ctx: &Context<'_>, id: u32) -> Result<Building> {
+    async fn building(&self, ctx: &Context<'_>, id: u32) -> Result<Option<Building>> {
         return resolve_building(ctx, &id).await;
     }
 

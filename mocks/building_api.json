@@ -13,7 +13,7 @@
       "type": "http",
       "documentation": "",
       "method": "get",
-      "endpoint": "buildings/1",
+      "endpoint": "buildings/:id",
       "responses": [
         {
           "uuid": "28067e5d-2209-4d6e-8b3b-a5f469fbc33a",
@@ -26,11 +26,46 @@
           "filePath": "",
           "databucketID": "",
           "sendFileAsBody": false,
-          "rules": [],
+          "rules": [
+            {
+              "target": "params",
+              "modifier": "id",
+              "value": "1",
+              "invert": false,
+              "operator": "equals"
+            }
+          ],
           "rulesOperator": "OR",
           "disableTemplating": false,
           "fallbackTo404": false,
           "default": true,
+          "crudKey": "id",
+          "callbacks": []
+        },
+        {
+          "uuid": "147c6fce-49a5-43e1-9faa-7439ce8c1b57",
+          "body": "{\n  \"id\": 2,\n  \"name\": \"House 2\"\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [
+            {
+              "target": "params",
+              "modifier": "id",
+              "value": "2",
+              "invert": false,
+              "operator": "equals"
+            }
+          ],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": false,
           "crudKey": "id",
           "callbacks": []
         }
@@ -75,41 +110,10 @@
       "type": "http",
       "documentation": "",
       "method": "get",
-      "endpoint": "rooms/1",
+      "endpoint": "rooms/:id",
       "responses": [
         {
           "uuid": "0fb32384-4cd9-40b7-94e8-d3a282b82f0c",
-          "body": "{\n  \"id\": 1,\n  \"name\": \"Room 1\"\n}",
-          "latency": 0,
-          "statusCode": 200,
-          "label": "",
-          "headers": [],
-          "bodyType": "INLINE",
-          "filePath": "",
-          "databucketID": "",
-          "sendFileAsBody": false,
-          "rules": [],
-          "rulesOperator": "OR",
-          "disableTemplating": false,
-          "fallbackTo404": false,
-          "default": true,
-          "crudKey": "id",
-          "callbacks": []
-        }
-      ],
-      "responseMode": null,
-      "streamingMode": null,
-      "streamingInterval": 0
-    },
-    {
-      "uuid": "6232fc9c-d361-4991-940c-35ae90eb9799",
-      "type": "http",
-      "documentation": "",
-      "method": "get",
-      "endpoint": "rooms/2",
-      "responses": [
-        {
-          "uuid": "482e2562-c727-493c-a1a1-7e26b6c6557c",
           "body": "{\n  \"id\": 2,\n  \"name\": \"Room 2\"\n}",
           "latency": 0,
           "statusCode": 200,
@@ -119,28 +123,51 @@
           "filePath": "",
           "databucketID": "",
           "sendFileAsBody": false,
-          "rules": [],
+          "rules": [
+            {
+              "target": "params",
+              "modifier": "id",
+              "value": "1",
+              "invert": false,
+              "operator": "equals"
+            }
+          ],
           "rulesOperator": "OR",
           "disableTemplating": false,
           "fallbackTo404": false,
           "default": true,
           "crudKey": "id",
           "callbacks": []
-        }
-      ],
-      "responseMode": null,
-      "streamingMode": null,
-      "streamingInterval": 0
-    },
-    {
-      "uuid": "bde157e1-3a48-4196-9f0f-677e69c2f054",
-      "type": "http",
-      "documentation": "",
-      "method": "get",
-      "endpoint": "rooms/3",
-      "responses": [
+        },
         {
-          "uuid": "7215b413-67e6-42e7-9f57-1a64cf42667f",
+          "uuid": "4889bbe9-121b-4cf2-93ec-b627059d8f41",
+          "body": "{\n  \"id\": 2,\n  \"name\": \"Room 2\"\n}",
+          "latency": 0,
+          "statusCode": 200,
+          "label": "",
+          "headers": [],
+          "bodyType": "INLINE",
+          "filePath": "",
+          "databucketID": "",
+          "sendFileAsBody": false,
+          "rules": [
+            {
+              "target": "params",
+              "modifier": "id",
+              "value": "2",
+              "invert": false,
+              "operator": "equals"
+            }
+          ],
+          "rulesOperator": "OR",
+          "disableTemplating": false,
+          "fallbackTo404": false,
+          "default": false,
+          "crudKey": "id",
+          "callbacks": []
+        },
+        {
+          "uuid": "270bfd32-547a-4f7c-8302-d5057179d462",
           "body": "{\n  \"id\": 3,\n  \"name\": \"Room 3\"\n}",
           "latency": 0,
           "statusCode": 200,
@@ -150,11 +177,19 @@
           "filePath": "",
           "databucketID": "",
           "sendFileAsBody": false,
-          "rules": [],
+          "rules": [
+            {
+              "target": "params",
+              "modifier": "id",
+              "value": "3",
+              "invert": false,
+              "operator": "equals"
+            }
+          ],
           "rulesOperator": "OR",
           "disableTemplating": false,
           "fallbackTo404": false,
-          "default": true,
+          "default": false,
           "crudKey": "id",
           "callbacks": []
         }
@@ -172,7 +207,7 @@
       "responses": [
         {
           "uuid": "27539e91-6c8c-41b8-9d70-be1fc90753b4",
-          "body": "[\n  {\n    \"id\": 1,\n    \"name\": \"Room 1\"\n  },\n  {\n    \"id\": 2,\n    \"name\": \"Room 2\"\n  },\n  {\n    \"id\": 3,\n    \"name\": \"Room 3\"\n  }\n]",
+          "body": "[\n  {\n    \"id\": 1,\n    \"name\": \"Room 1\",\n    \"buildingId\": 1\n  },\n  {\n    \"id\": 2,\n    \"name\": \"Room 2\",\n    \"buildingId\": 1\n  },\n  {\n    \"id\": 3,\n    \"name\": \"Room 3\",\n    \"buildingId\": 2\n  }\n]",
           "latency": 0,
           "statusCode": 200,
           "label": "",
@@ -198,27 +233,19 @@
   "rootChildren": [
     {
       "type": "route",
-      "uuid": "f1466afd-2192-42fe-b8fb-de8c049e6deb"
-    },
-    {
-      "type": "route",
       "uuid": "7b9a8c5b-d5ef-4951-815f-8954bfb862f8"
     },
     {
       "type": "route",
-      "uuid": "4084385f-b001-4115-aed0-ef93f1b685af"
-    },
-    {
-      "type": "route",
-      "uuid": "6232fc9c-d361-4991-940c-35ae90eb9799"
-    },
-    {
-      "type": "route",
-      "uuid": "bde157e1-3a48-4196-9f0f-677e69c2f054"
+      "uuid": "f1466afd-2192-42fe-b8fb-de8c049e6deb"
     },
     {
       "type": "route",
       "uuid": "dac09986-60a2-42f7-b6f6-7b8a693f74bb"
+    },
+    {
+      "type": "route",
+      "uuid": "4084385f-b001-4115-aed0-ef93f1b685af"
     }
   ],
   "proxyMode": false,
