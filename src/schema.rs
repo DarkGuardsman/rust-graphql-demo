@@ -54,4 +54,14 @@ impl Query {
     async fn room(&self, ctx: &Context<'_>, id: u32) -> Result<Option<Room>> {
         return resolve_room(ctx, &id).await;
     }
+
+    #[graphql(entity)]
+    async fn resolve_room_entity_by_id(&self, ctx: &Context<'_>, id: u32) -> Result<Option<Room>> {
+        return resolve_room(ctx, &id).await;
+    }
+
+    #[graphql(entity)]
+    async fn resolve_building_entity_by_id(&self, ctx: &Context<'_>, id: u32) -> Result<Option<Building>> {
+        return resolve_building(ctx, &id).await;
+    }
 }
