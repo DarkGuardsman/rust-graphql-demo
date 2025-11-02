@@ -94,8 +94,8 @@ async fn graphql_handler(
 ) -> GraphQLResponse {
     let mut req = req.into_inner();
     let headers = get_headers_for_context(&headers);
-    if headers.is_err() {
-        let error = headers.err().unwrap(); // TODO revisit this as its a mess
+    if let Err(error) = headers {
+        // TODO revisit this as its a mess
         let server_error = ServerError::new(error.message.clone(), None);
         return GraphQLResponse::from(async_graphql::Response::from_errors(vec![server_error]));
     }
