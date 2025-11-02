@@ -2,12 +2,14 @@ mod resolvers;
 mod schema;
 mod loaders;
 mod datasource;
+mod mem_tracing;
 
 use anyhow::Context;
 use async_graphql::{
     EmptyMutation, EmptySubscription, Error, Result, Schema, http::GraphiQLSource, ServerError,
 };
 use async_graphql::dataloader::DataLoader;
+use async_graphql::extensions::Tracing;
 use async_graphql_axum::GraphQLRequest;
 use async_graphql_axum::GraphQLResponse;
 use axum::{
@@ -18,7 +20,11 @@ use axum::{
 use axum::{extract::State, http::HeaderMap};
 use dotenv::dotenv;
 use tokio::net::TcpListener;
+use crate::mem_tracing::MemoryMetricsExtension;
 use crate::schema::{Query, RoomLoader};
+
+//#[global_allocator] TODO this only works on unix
+//static ALLOC: jemallocator::Jemalloc = jemallocator::Jemalloc;
 
 //#region [ENV Defaults]
 const DEFAULT_ADDRESS: &str = "127.0.0.1";
@@ -50,6 +56,8 @@ async fn start_server() -> anyhow::Result<()> {
 
     // Setup GraphQL
     let schema = Schema::build(Query, EmptyMutation, EmptySubscription)
+        .extension(MemoryMetricsExtension)
+        .extension(Tracing)
         .data(AppContext::new(use_room_loader))
         .finish();
 
