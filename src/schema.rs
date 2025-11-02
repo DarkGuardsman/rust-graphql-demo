@@ -1,7 +1,5 @@
 use async_graphql::{ComplexObject, Context, Object, SimpleObject, Result};
-use async_graphql::dataloader::DataLoader;
 use serde::{Deserialize, Serialize};
-use crate::AppContext;
 pub(crate) use crate::loaders::room_loader::RoomLoader;
 use crate::resolvers::resolve_building::resolve_building;
 use crate::resolvers::resolve_building_list::resolve_building_list;
@@ -31,6 +29,7 @@ impl Building {
 
 #[Object]
 impl Query {
+
     async fn building(&self, ctx: &Context<'_>, id: u32) -> Result<Building> {
         return resolve_building(ctx, &id).await;
     }

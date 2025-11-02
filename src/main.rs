@@ -1,6 +1,7 @@
 mod resolvers;
 mod schema;
 mod loaders;
+mod datasource;
 
 use anyhow::Context;
 use async_graphql::{
@@ -17,7 +18,6 @@ use axum::{
 use axum::{extract::State, http::HeaderMap};
 use dotenv::dotenv;
 use tokio::net::TcpListener;
-
 use crate::schema::{Query, RoomLoader};
 
 //#region [ENV Defaults]
@@ -78,15 +78,13 @@ async fn start_server() -> anyhow::Result<()> {
 }
 
 pub struct AppContext {
-    pub use_room_loader: bool,
-    pub room_loader: DataLoader<RoomLoader>,
+    pub use_room_loader: bool
 }
 
 impl AppContext {
     pub fn new(use_room_loader: bool) -> Self {
         Self {
-            use_room_loader,
-            room_loader: DataLoader::new(RoomLoader {}, tokio::spawn),
+            use_room_loader
         }
     }
 }
@@ -94,6 +92,10 @@ impl AppContext {
 #[derive(Clone)]
 pub struct Headers {
     pub token: String,
+}
+
+pub struct DataLoaders {
+    pub room_loader: DataLoader<RoomLoader>,
 }
 
 fn get_headers_for_context(headers: &HeaderMap) -> Result<Headers> {
@@ -114,14 +116,21 @@ async fn graphql_handler(
     req: GraphQLRequest,
 ) -> GraphQLResponse {
     let mut req = req.into_inner();
-    let headers = get_headers_for_context(&headers);
-    if let Err(error) = headers {
+
+    let headers_result = get_headers_for_context(&headers);
+    if let Err(error) = headers_result {
         // TODO revisit this as its a mess
         let server_error = ServerError::new(error.message.clone(), None);
         return GraphQLResponse::from(async_graphql::Response::from_errors(vec![server_error]));
     }
 
-    req = req.data(headers.unwrap());
+    let headers = headers_result.unwrap();
+    let data_loaders = DataLoaders {
+        // TODO see if there is a better way to pass token then to remake loader per request
+        room_loader: DataLoader::new(RoomLoader { token: headers.token.clone() }, tokio::spawn),
+    };
+
+    req = req.data(headers).data(data_loaders);
     schema.execute(req).await.into()
 }
 
