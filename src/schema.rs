@@ -1,6 +1,7 @@
 use async_graphql::{ComplexObject, Context, Object, SimpleObject, Result};
 use serde::{Deserialize, Serialize};
 use crate::resolvers::resolve_building::resolve_building;
+use crate::resolvers::resolve_building_list::resolve_building_list;
 
 pub struct Query;
 
@@ -29,5 +30,9 @@ impl Building {
 impl Query {
     async fn building(&self, ctx: &Context<'_>, id: u32) -> Result<Building> {
         return resolve_building(ctx, &id).await;
+    }
+
+    async fn buildings(&self, ctx: &Context<'_>) -> Result<Vec<Building>> {
+        return resolve_building_list(ctx).await;
     }
 }
