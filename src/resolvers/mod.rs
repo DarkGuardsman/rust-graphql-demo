@@ -1,1 +1,1 @@
-pub mod resolve_hello;
+pub mod resolve_building;

@@ -1,16 +1,33 @@
-use async_graphql::{Context, InputObject, Object};
-use crate::resolvers::resolve_hello::resolve_hello;
+use async_graphql::{ComplexObject, Context, Object, SimpleObject, Result};
+use serde::{Deserialize, Serialize};
+use crate::resolvers::resolve_building::resolve_building;
 
 pub struct Query;
 
-#[derive(InputObject)]
-pub struct HelloInput {
-    pub message: String,
+
+#[derive(SimpleObject, Deserialize, Serialize)]
+pub struct Room {
+    pub id: u32,
+    pub name: String,
+}
+
+#[derive(SimpleObject, Deserialize, Serialize)]
+#[graphql(complex)]
+pub struct Building {
+    pub id: u32,
+    pub name: String,
+}
+
+#[ComplexObject]
+impl Building {
+    async fn rooms(&self) -> Vec<Room> {
+        vec![]
+    }
 }
 
 #[Object]
 impl Query {
-    async fn hello(&self, ctx: &Context<'_>, input: HelloInput) -> String {
-        resolve_hello(&ctx, &input)
+    async fn building(&self, ctx: &Context<'_>, id: u32) -> Result<Building> {
+        return resolve_building(ctx, &id).await;
     }
 }
