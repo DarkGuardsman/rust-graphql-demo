@@ -6,7 +6,7 @@ use async_graphql::extensions::{
 };
 use async_graphql::{Value};
 use std::sync::Arc;
-use alloc_metrics::{global_metrics, thread_metrics};
+use alloc_metrics::{global_metrics};
 use byte_unit::{Byte};
 use log::{debug, trace};
 
