@@ -55,7 +55,10 @@ USER appuser
 COPY --from=build /bin/server /bin/server
 
 # Expose the port that the application listens on.
-EXPOSE 8080
+EXPOSE 3000
+
+ENV SERVER_ADDRESS="0.0.0.0"
+ENV SERVER_PORT="3000"
 
 # What the container should run when it is started.
 ENTRYPOINT ["/bin/server"]

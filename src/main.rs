@@ -26,7 +26,7 @@ use crate::schema::{Query, RoomLoader};
 
 //#region [ENV Defaults]
 const DEFAULT_ADDRESS: &str = "127.0.0.1";
-const DEFAULT_PORT: &str = "8080";
+const DEFAULT_PORT: &str = "3000";
 const DEFAULT_GRAPHQL_ROUTE: &str = "graphql";
 //#endregion [ENV Defaults]
 
