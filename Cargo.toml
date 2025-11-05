@@ -6,6 +6,11 @@ edition = "2024"
 
 [package.metadata.scripts]
 run-local="cargo run --features local"
+pod-build="podman build -t rust-graph-demo ."
+pod-start="podman run -d -p 3000:3000 --memory 1G --cpus 1.5 --name rust-graph-demo --env-file ./docker.env rust-graph-demo"
+pod-stats="podman stats rust-graph-demo"
+pod-stop="podman stop rust-graph-demo"
+pod-clean="podman rm rust-graph-demo"
 
 [features]
 local=[]
