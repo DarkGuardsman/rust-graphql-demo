@@ -10,8 +10,9 @@ run-local="cargo run --features local"
 [features]
 local=[]
 
-[profile.release]
-debug = true
+# https://doc.rust-lang.org/beta/cargo/reference/profiles.html
+#[profile.release]
+#debug = true # Only enable for local perf testing, as this will take the release from 12MB to 200MB
 
 [dependencies]
 tracing = { version = "0.1.41", features = ["attributes"] }
